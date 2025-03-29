@@ -170,7 +170,7 @@
                     'eng',
                     { logger: (m) => console.log(m) }
                 ).then(({ data: { text } }) => {
-                    document.getElementById("problem").value = text;
+                    document.getElementById("problem").value = text.trim();
                 });
             }
         }
