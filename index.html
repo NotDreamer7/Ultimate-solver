@@ -117,10 +117,10 @@
                     let expr = problem.replace("factor(", "").replace(")", "");
                     solution = math.simplify(expr).toString();
                 } else {
-                    solution = math.evaluate(problem);
+                    solution = math.evaluate(problem).toString();
                 }
                 document.getElementById("solution").innerText = "Solution: " + solution;
-            } catch {
+            } catch (error) {
                 document.getElementById("solution").innerText = "Invalid Expression!";
             }
         }
@@ -170,7 +170,9 @@
                     'eng',
                     { logger: (m) => console.log(m) }
                 ).then(({ data: { text } }) => {
-                    document.getElementById("problem").value = text.trim();
+                    let extractedText = text.trim();
+                    console.log("Extracted text:", extractedText); // To check what Tesseract returns
+                    document.getElementById("problem").value = extractedText; // Display in input field
                 });
             }
         }
