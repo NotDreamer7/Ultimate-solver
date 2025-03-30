@@ -93,15 +93,17 @@
             cursor: pointer;
             margin-top: 10px;
         }
-        .drop-area {
-            width: 320px;
-            height: 150px;
+        #drop-area {
             border: 2px dashed white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
+            padding: 20px;
+            margin-top: 20px;
             cursor: pointer;
+        }
+        .coming-soon {
+            margin-top: 20px;
+            font-size: 18px;
+            color: yellow;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -111,43 +113,40 @@
     <div class="container">
         <div class="dropdown-container">
             <span class="dropdown-label">Select Your Subject:</span>
-            <select class="dropdown">
-                <option>Mathematics</option>
-                <option>Physics</option>
-                <option>Chemistry</option>
+            <select class="dropdown" id="subject">
+                <option value="math">Mathematics</option>
+                <option value="physics">Physics</option>
+                <option value="chemistry">Chemistry</option>
             </select>
         </div>
         <input type="text" id="problem" class="search-bar" placeholder="Enter your problem">
-        <div class="drop-area" id="drop-area" ondrop="handleDrop(event)" ondragover="event.preventDefault()">
-            Drag & Drop or Paste Image Here
-        </div>
         <button class="btn" onclick="solveProblem()">Solve</button>
+        <div id="drop-area">Drag & Drop or Paste Image Here</div>
         <div class="solution" id="solution">Solution: </div>
+        <div class="coming-soon">Physics and Chemistry problem solving is coming soon!</div>
     </div>
+    
     <script>
-        function toggleDarkMode() {
-            let body = document.body;
-            let btn = document.querySelector(".dark-mode-btn");
-            if (body.style.backgroundColor === "white") {
-                body.style.backgroundColor = "#121212";
-                body.style.color = "white";
-                btn.innerText = "🌙";
-            } else {
-                body.style.backgroundColor = "white";
-                body.style.color = "black";
-                btn.innerText = "☀️";
+        function solveProblem() {
+            let problem = document.getElementById("problem").value.trim();
+            let subject = document.getElementById("subject").value;
+            let solution = "";
+            
+            try {
+                if (subject === "math") {
+                    solution = math.evaluate(problem); // Follows BODMAS
+                } else if (subject === "physics") {
+                    solution = "Physics problem-solving not yet implemented.";
+                } else if (subject === "chemistry") {
+                    solution = "Chemistry problem-solving not yet implemented.";
+                }
+                document.getElementById("solution").innerText = "Solution: " + solution;
+            } catch (error) {
+                document.getElementById("solution").innerText = "Invalid Expression!";
             }
         }
 
-        function handleDrop(event) {
-            event.preventDefault();
-            let files = event.dataTransfer.files;
-            if (files.length > 0) {
-                processImage(files[0]);
-            }
-        }
-
-        document.addEventListener("paste", (event) => {
+        document.getElementById("drop-area").addEventListener("paste", function(event) {
             let items = event.clipboardData.items;
             for (let item of items) {
                 if (item.type.indexOf("image") !== -1) {
@@ -156,14 +155,12 @@
                 }
             }
         });
-
+        
         function processImage(imageFile) {
             Tesseract.recognize(
                 imageFile,
                 'eng',
-                {
-                    logger: (m) => console.log(m)
-                }
+                { logger: (m) => console.log(m) }
             ).then(({ data: { text } }) => {
                 document.getElementById("problem").value = text;
             });
@@ -171,5 +168,6 @@
     </script>
 </body>
 </html>
+
 
 
