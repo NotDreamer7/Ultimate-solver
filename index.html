@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate PCM Solver</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.3.2/math.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.0.2/tesseract.min.js"></script>
     <style>
         body {
@@ -25,11 +24,16 @@
             font-weight: bold;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
             z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
         }
         .dark-mode-btn {
-            position: fixed;
-            top: 60px;
-            right: 20px;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
             width: 40px;
             height: 40px;
             font-size: 20px;
@@ -108,8 +112,10 @@
     </style>
 </head>
 <body>
-    <div class="header">Ultimate PCM Solver</div>
-    <div class="dark-mode-btn" onclick="toggleDarkMode()">🌙</div>
+    <div class="header">
+        Ultimate PCM Solver
+        <div class="dark-mode-btn" onclick="toggleDarkMode()">🌙</div>
+    </div>
     <div class="container">
         <div class="dropdown-container">
             <span class="dropdown-label">Select Your Subject:</span>
@@ -127,43 +133,51 @@
     </div>
     
     <script>
-        function solveProblem() {
+        async function solveProblem() {
             let problem = document.getElementById("problem").value.trim();
             let subject = document.getElementById("subject").value;
             let solution = "";
             
+            if (!problem) {
+                document.getElementById("solution").innerText = "Please enter a problem!";
+                return;
+            }
+            
+            const API_KEY = "AIzaSyDEk5NkMNXxW4so_9sJ8Wlx9CH_lF3wG08"; // Replace with actual key
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+            
+            const requestBody = {
+                prompt: { text: `Solve this ${subject} problem: ${problem}` },
+                temperature: 0.7,
+            };
+            
             try {
-                if (subject === "math") {
-                    solution = math.evaluate(problem); // Follows BODMAS
-                } else if (subject === "physics") {
-                    solution = "Physics problem-solving not yet implemented.";
-                } else if (subject === "chemistry") {
-                    solution = "Chemistry problem-solving not yet implemented.";
-                }
+                let response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(requestBody),
+                });
+                
+                let data = await response.json();
+                solution = data.candidates[0]?.content ?? "No solution found!";
                 document.getElementById("solution").innerText = "Solution: " + solution;
             } catch (error) {
-                document.getElementById("solution").innerText = "Invalid Expression!";
+                document.getElementById("solution").innerText = "Error fetching solution!";
             }
         }
-
-        document.getElementById("drop-area").addEventListener("paste", function(event) {
-            let items = event.clipboardData.items;
-            for (let item of items) {
-                if (item.type.indexOf("image") !== -1) {
-                    let blob = item.getAsFile();
-                    processImage(blob);
-                }
-            }
-        });
         
-        function processImage(imageFile) {
-            Tesseract.recognize(
-                imageFile,
-                'eng',
-                { logger: (m) => console.log(m) }
-            ).then(({ data: { text } }) => {
-                document.getElementById("problem").value = text;
-            });
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            let button = document.querySelector(".dark-mode-btn");
+            if (document.body.classList.contains("dark-mode")) {
+                button.innerText = "☀️";
+                document.body.style.backgroundColor = "#121212";
+                document.body.style.color = "white";
+            } else {
+                button.innerText = "🌙";
+                document.body.style.backgroundColor = "white";
+                document.body.style.color = "black";
+            }
         }
     </script>
 </body>
